@@ -1,0 +1,10 @@
+[
+  {
+    "id": "ord_1690000000000",
+    "skinName": "Skin Naruto",
+    "amount": 0,
+    "status": "pending|approved|rejected",
+    "verifiedAt": null,
+    "createdAt": 1690000000000
+  }
+]
