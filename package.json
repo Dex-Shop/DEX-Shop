@@ -7,9 +7,16 @@
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
-  "keywords": ["minecraft", "skin", "shop"],
+  "keywords": [
+    "minecraft",
+    "skin",
+    "shop"
+  ],
   "author": "DEX SHOP",
   "license": "MIT",
+  "engines": {
+    "node": "20.x"
+  },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
