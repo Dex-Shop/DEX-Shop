@@ -7,9 +7,16 @@ const { Canvas, createCanvas } = require('canvas');
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
-app.use(express.static('public'));
+
+// [PERBAIKAN 1]: Menggunakan path.join agar Vercel bisa menemukan folder public
+app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
+
+// [PERBAIKAN 2]: Menambahkan route spesifik untuk memanggil index.html di halaman utama
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: Date.now() });
@@ -109,13 +116,16 @@ app.get('/api/images/qris', (req, res) => {
   }
 });
 
+// NOTE: Fungsi upload & verify di bawah ini sementara akan lolos tanpa error,
+// namun datanya HANYA bertahan sementara dan akan hilang saat Vercel me-refresh server.
 app.post('/api/skins/upload', (req, res) => {
   try {
     const { name, category, description, imageData } = req.body;
     
-    const skinsFile = path.join(__dirname, 'data', 'skins.json');
-    if (!fs.existsSync(path.join(__dirname, 'data'))) {
-      fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
+    const dataDir = path.join(__dirname, 'data');
+    const skinsFile = path.join(dataDir, 'skins.json');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
     }
 
     let skins = [];
@@ -163,9 +173,10 @@ app.post('/api/orders/verify', (req, res) => {
   try {
     const { orderId, skinName, amount } = req.body;
     
-    const ordersFile = path.join(__dirname, 'data', 'orders.json');
-    if (!fs.existsSync(path.join(__dirname, 'data'))) {
-      fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
+    const dataDir = path.join(__dirname, 'data');
+    const ordersFile = path.join(dataDir, 'orders.json');
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
     }
 
     let orders = [];
@@ -192,7 +203,14 @@ app.post('/api/orders/verify', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 DEX SHOP Backend running on port ${PORT}`);
-  console.log(`📍 http://localhost:${PORT}`);
-});
+// [PERBAIKAN 3]: Penyesuaian eksekusi aplikasi untuk lingkungan Vercel Serverless
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`🚀 DEX SHOP Backend running on port ${PORT}`);
+    console.log(`📍 http://localhost:${PORT}`);
+  });
+}
+
+// Ekspor app agar dikenali oleh Vercel Serverless
+module.exports = app;
+        
